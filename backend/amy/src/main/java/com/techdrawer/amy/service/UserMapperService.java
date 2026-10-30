@@ -13,7 +13,9 @@ public class UserMapperService {
                 user.getPublicId(),
                 user.getName(),
                 user.getEmail(),
-                user.getRole()
+                user.getRole(),
+                user.getIsActivated(),
+                user.getIsValidated()
         );
     }
 }

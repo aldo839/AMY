@@ -9,7 +9,9 @@ public record UserResponseDTO(
         UUID publicId,
         String name,
         String email,
-        Role role
+        Role role,
+        Boolean isActivated,
+        Boolean isValidated
 
 ) {
 }

@@ -1,5 +1,6 @@
 package com.techdrawer.amy.controller;
 
+import com.techdrawer.amy.dto.AccountActivationDTO;
 import com.techdrawer.amy.dto.UserRegistrationDTO;
 import com.techdrawer.amy.dto.UserResponseDTO;
 import com.techdrawer.amy.service.AuthService;
@@ -37,6 +38,12 @@ public class AuthController {
     @PostMapping("/register-admin")
     public ResponseEntity<UserResponseDTO> registerAdmin(@RequestBody @Valid UserRegistrationDTO dto) {
         return new ResponseEntity<>(authService.registerAdmin(dto), HttpStatus.CREATED);
+    }
+
+
+    @PostMapping("/activate")
+    public ResponseEntity<UserResponseDTO> activate(@RequestBody @Valid AccountActivationDTO dto) {
+        return new ResponseEntity<>(authService.activate(dto), HttpStatus.ACCEPTED);
     }
 
 }
