@@ -1,17 +1,12 @@
 package com.techdrawer.amy.controller;
 
-import com.techdrawer.amy.dto.AccountActivationDTO;
-import com.techdrawer.amy.dto.UserRegistrationDTO;
-import com.techdrawer.amy.dto.UserResponseDTO;
+import com.techdrawer.amy.dto.*;
 import com.techdrawer.amy.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,6 +39,18 @@ public class AuthController {
     @PostMapping("/activate")
     public ResponseEntity<UserResponseDTO> activate(@RequestBody @Valid AccountActivationDTO dto) {
         return new ResponseEntity<>(authService.activate(dto), HttpStatus.ACCEPTED);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginRequestDTO dto) {
+        return new ResponseEntity<>(authService.login(dto), HttpStatus.OK);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestBody @Valid LogoutRequestDTO dto) {
+
+        authService.logout(dto.getRefreshToken());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

@@ -1,18 +1,23 @@
 package com.techdrawer.amy.service;
 
-import com.techdrawer.amy.dto.AccountActivationDTO;
-import com.techdrawer.amy.dto.UserRegistrationDTO;
-import com.techdrawer.amy.dto.UserResponseDTO;
+import com.techdrawer.amy.config.JwtUtils;
+import com.techdrawer.amy.dto.*;
 import com.techdrawer.amy.exception.ExpiredCodeException;
 import com.techdrawer.amy.exception.MissingArgumentException;
 import com.techdrawer.amy.exception.UserAlreadyExistException;
 import com.techdrawer.amy.exception.UserNotFoundException;
+import com.techdrawer.amy.model.RefreshToken;
 import com.techdrawer.amy.model.Role;
 import com.techdrawer.amy.model.User;
 import com.techdrawer.amy.model.Validation;
+import com.techdrawer.amy.repository.RefreshTokenRepository;
 import com.techdrawer.amy.repository.UserRepository;
 import com.techdrawer.amy.repository.ValidationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +33,10 @@ public class AuthService {
     private final UserMapperService userMapperService;
     private final ValidationService validationService;
     private final ValidationRepository validationRepository;
+    private final AuthenticationManager authenticationManager;
+    private final RefreshTokenService refreshTokenService;
+    private final JwtUtils jwtUtils;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     // User registration
     public UserResponseDTO register(UserRegistrationDTO dto, Role role) {
@@ -97,6 +106,43 @@ public class AuthService {
         User activatedUser = userRepository.save(user);
 
         return userMapperService.mapToResponseDTO(activatedUser);
+    }
+
+
+    // User login
+    public LoginResponseDTO login(LoginRequestDTO dto) {
+
+        if (dto.getEmail().isBlank() || dto.getPassword().isBlank()){
+            throw new MissingArgumentException("Missing email or password");
+        }
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword())
+        );
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        assert userDetails != null;
+        String accessToken = jwtUtils.generateToken(userDetails);
+
+        User loggedUser = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        UserResponseDTO user = userMapperService.mapToResponseDTO(loggedUser);
+
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(loggedUser.getId());
+
+        return new LoginResponseDTO(user, accessToken, refreshToken.getToken());
+    }
+
+
+    // User logout
+    public void logout(String tokenValue) {
+
+        RefreshToken refreshToken = refreshTokenRepository.findByToken(tokenValue)
+                        .orElseThrow(() -> new UserNotFoundException("Token not found, please login"));
+
+        refreshTokenRepository.delete(refreshToken);
     }
 
 }
