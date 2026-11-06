@@ -30,4 +30,21 @@ public class NotificationService {
         javaMailSender.send(message);
     }
 
+    public void sendResetPasswordValidation(Validation validation) {
+
+        SimpleMailMessage message = new SimpleMailMessage();
+
+        String text = String.format(
+                "Hello %s \nThis is your reset password validation code %s \nSee you on the reset password page",
+                validation.getUser().getName(),
+                validation.getCode()
+        );
+
+        message.setSubject("Reset Password Code");
+        message.setFrom("no-reply@amy.art");
+        message.setTo(validation.getUser().getEmail());
+        message.setText(text);
+
+        javaMailSender.send(message);
+    }
 }

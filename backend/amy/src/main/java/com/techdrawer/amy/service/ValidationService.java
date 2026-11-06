@@ -39,5 +39,26 @@ public class ValidationService {
 
     }
 
+    public void passwordResetCode(User user) {
+
+        SecureRandom random = new SecureRandom();
+        Integer randomInt = random.nextInt(999999);
+        String code = String.format("%06d", randomInt);
+
+        Instant creation = Instant.now();
+        Instant expiration = creation.plus(5, ChronoUnit.MINUTES);
+
+        Validation validation = new Validation();
+
+        validation.setCode(code);
+        validation.setCreation(creation);
+        validation.setExpiration(expiration);
+        validation.setUser(user);
+
+        validationRepository.save(validation);
+
+        notificationService.sendResetPasswordValidation(validation);
+    }
+
 
 }

@@ -15,8 +15,10 @@ import com.techdrawer.amy.repository.UserRepository;
 import com.techdrawer.amy.repository.ValidationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -105,6 +107,8 @@ public class AuthService {
 
         User activatedUser = userRepository.save(user);
 
+        validationRepository.delete(validation);
+
         return userMapperService.mapToResponseDTO(activatedUser);
     }
 
@@ -140,9 +144,57 @@ public class AuthService {
     public void logout(String tokenValue) {
 
         RefreshToken refreshToken = refreshTokenRepository.findByToken(tokenValue)
-                        .orElseThrow(() -> new UserNotFoundException("Token not found, please login"));
+                .orElseThrow(() -> new UserNotFoundException("Token not found, please login"));
 
         refreshTokenRepository.delete(refreshToken);
+    }
+
+
+    // Fetch current user
+    public User getCurrentUser() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new BadCredentialsException("User is not authenticated");
+        }
+
+        String email = authentication.getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+    }
+
+
+    // Reset password
+    public void resetPasswordRequest(ForgetPasswordRequestDTO dto) {
+
+        if (dto.getEmail().isBlank()) {
+            throw new MissingArgumentException("Missing information's");
+        }
+
+        User user = userRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        validationService.passwordResetCode(user);
+    }
+
+    public void updatePassword(ResetPasswordRequestDTO dto) {
+
+        if (dto.getCode().isBlank() || dto.getPassword().isBlank()) {
+            throw new MissingArgumentException("Missing information's");
+        }
+
+        Validation validation = validationRepository.findByCode(dto.getCode())
+                .orElseThrow(() -> new UserNotFoundException("Code not found"));
+
+        User user = validation.getUser();
+
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+
+        userRepository.save(user);
+
+        validationRepository.delete(validation);
     }
 
 }
