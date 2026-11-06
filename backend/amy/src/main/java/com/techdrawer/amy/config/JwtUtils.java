@@ -20,56 +20,61 @@ public class JwtUtils {
     @Value("${app.jwt-secret-key}")
     private String SECRET;
 
-    private SecretKey getSignKey() {
-        return Keys.hmacShaKeyFor(
-                Decoders.BASE64.decode(SECRET)
-        );
+    private SecretKey getSingKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(UserDetails userDetails){
 
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .issuedAt(Date.from(Instant.now()))
-                .expiration(Date.from(Instant.now().plus(15, ChronoUnit.MILLIS)))
-                .signWith(getSignKey())
+                .expiration(Date.from(Instant.now().plus(15, ChronoUnit.MINUTES)))
+                .signWith(getSingKey())
                 .compact();
     }
 
-    public String extractUsername(String token) {
+    // Extract username
+    public String extractUsername(String token){
 
         return extractClaims(token, Claims::getSubject);
     }
 
-    public Date extractExpiration(String token) {
+    // Extract expiration date
+    private Date extractExpiration(String token){
 
         return extractClaims(token, Claims::getExpiration);
     }
 
+    // Extract Claims
     private <T> T extractClaims(String token, Function<Claims, T> claimsResolver) {
 
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
+    // Extract All Claims
     private Claims extractAllClaims(String token) {
 
-        return Jwts
-                .parser()
+        return Jwts.parser()
+                .verifyWith(getSingKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
     }
 
-    private Boolean isExpired(String token) {
+    // Expiration verification
+    private Boolean isExpired(String token){
 
         return extractExpiration(token).before(Date.from(Instant.now()));
     }
 
-    public Boolean isValid(String token, UserDetails userDetails) {
+    // Validity verification
+    public Boolean isValid(String token, UserDetails userDetails){
 
         String username = userDetails.getUsername();
-        return (extractUsername(token).equals(username) && !isExpired(token));
+        return (username.equals(extractUsername(token)) && !isExpired(token));
     }
 
 }
