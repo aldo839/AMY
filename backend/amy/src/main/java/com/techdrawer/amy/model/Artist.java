@@ -18,14 +18,16 @@ public class Artist {
 
     private String bibliography;
 
-    private String speciality;
+    @Enumerated(EnumType.STRING)
+    private ArtistSpeciality speciality;
 
-    private String artisticStyle;
+    @Enumerated(EnumType.STRING)
+    private ArtisticStyle artisticStyle;
 
     private String portfolioUrl;
 
     private String socialLinks;
 
-    private Boolean verificationStatus;
+    private Boolean verificationStatus = false;
 
 }
