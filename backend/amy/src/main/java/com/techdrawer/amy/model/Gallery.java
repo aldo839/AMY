@@ -19,12 +19,14 @@ public class Gallery {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private String City;
+    @Enumerated(EnumType.STRING)
+    private City city;
 
     private String Location;
 
     private String description;
 
+    @Enumerated(EnumType.STRING)
     private GalleryType galleryType;
 
     private String website;
