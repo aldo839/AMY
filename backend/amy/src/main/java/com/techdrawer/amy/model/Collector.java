@@ -20,11 +20,12 @@ public class Collector {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Enumerated(EnumType.STRING)
     private CollectorType collectorType;
 
     private String interest;
 
-    private String preferredStyle;
+    private List<ArtisticStyle> preferredStyle;
 
     @ManyToMany
     @JoinTable(
