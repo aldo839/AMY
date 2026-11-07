@@ -24,6 +24,8 @@ public class Artist {
     @Enumerated(EnumType.STRING)
     private ArtisticStyle artisticStyle;
 
+    private String profilePictureUrl;
+
     private String portfolioUrl;
 
     private String socialLinks;

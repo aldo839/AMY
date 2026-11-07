@@ -11,6 +11,7 @@ import com.techdrawer.amy.repository.CollectorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,6 +23,7 @@ public class CollectorService {
     private final CollectorRepository collectorRepository;
     private final CollectorMapperService collectorMapperService;
     private final AuthService authService;
+    private final FileStorageService fileStorageService;
 
     public List<CollectorResponseDTO> getAllCollector() {
 
@@ -48,7 +50,7 @@ public class CollectorService {
     }
 
 
-    public CollectorResponseDTO createCollector(CollectorRegistrationDTO dto, UUID publicId) {
+    public CollectorResponseDTO createCollector(CollectorRegistrationDTO dto, MultipartFile file, UUID publicId) {
 
         User user = authService.getCurrentUser();
 
@@ -65,13 +67,18 @@ public class CollectorService {
         collector.setPreferredStyle(dto.getPreferredStyle());
         collector.setShippingAddresses(dto.getShippingAddress());
 
+        if (file != null && !file.isEmpty()){
+            String fileName = fileStorageService.storeFile(file);
+            collector.setProfilePictureUrl("/images/" + fileName);
+        }
+
         Collector createdCollector = collectorRepository.save(collector);
 
         return collectorMapperService.mapToResponseDTO(createdCollector);
     }
 
 
-    public CollectorResponseDTO updateCollector(CollectorRegistrationDTO dto, UUID publicId) {
+    public CollectorResponseDTO updateCollector(CollectorRegistrationDTO dto, MultipartFile file, UUID publicId) {
 
         User user = authService.getCurrentUser();
 
@@ -95,6 +102,10 @@ public class CollectorService {
         }
         if (dto.getShippingAddress() != null) {
             collector.setShippingAddresses(dto.getShippingAddress());
+        }
+        if (file != null && !file.isEmpty()){
+            String fileName = fileStorageService.storeFile(file);
+            collector.setProfilePictureUrl("/images/" + fileName);
         }
 
         Collector updatedCollector = collectorRepository.save(collector);

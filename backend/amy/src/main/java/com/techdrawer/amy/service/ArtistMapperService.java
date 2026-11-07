@@ -15,6 +15,7 @@ public class ArtistMapperService {
                 artist.getBibliography(),
                 artist.getSpeciality(),
                 artist.getArtisticStyle(),
+                artist.getProfilePictureUrl(),
                 artist.getPortfolioUrl(),
                 artist.getSocialLinks(),
                 artist.getVerificationStatus()

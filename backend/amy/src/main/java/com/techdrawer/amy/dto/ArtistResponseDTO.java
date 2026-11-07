@@ -9,6 +9,7 @@ public record ArtistResponseDTO(
         String bibliography,
         ArtistSpeciality speciality,
         ArtisticStyle artisticStyle,
+        String profilePictureUrl,
         String portfolioUrl,
         String socialLinks,
         Boolean verificationStatus

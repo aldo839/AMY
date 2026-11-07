@@ -45,7 +45,9 @@ public class AuthServiceTest {
                 UUID.randomUUID(),
                 "testartist1",
                 "testartist1@gmail.com",
-                Role.ARTIST
+                Role.ARTIST,
+                false,
+                false
         );
 
         // Act

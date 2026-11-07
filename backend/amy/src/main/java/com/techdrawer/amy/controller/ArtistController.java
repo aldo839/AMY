@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,7 +22,7 @@ public class ArtistController {
 
     private final ArtistService artistService;
 
-    @GetMapping
+    @GetMapping("/")
     public ResponseEntity<List<ArtistResponseDTO>> getAllArtists() {
         return ResponseEntity.ok(artistService.getAllArtists());
     }
@@ -42,13 +43,21 @@ public class ArtistController {
     }
 
     @PostMapping("/{publicId}/register")
-    public ResponseEntity<ArtistResponseDTO> register(@Valid @RequestBody ArtistRegistrationDTO dto, @PathVariable UUID publicId) {
-        return new ResponseEntity<>(artistService.registerArtist(dto, publicId), HttpStatus.CREATED);
+    public ResponseEntity<ArtistResponseDTO> register(
+            @RequestPart("data") @Valid ArtistRegistrationDTO dto,
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            @PathVariable UUID publicId) {
+
+        return new ResponseEntity<>(artistService.registerArtist(dto, file, publicId), HttpStatus.CREATED);
     }
 
     @PutMapping("/{publicId}")
-    public ResponseEntity<ArtistResponseDTO> update(@Valid @RequestBody ArtistRegistrationDTO dto, @PathVariable UUID publicId) {
-        return ResponseEntity.ok(artistService.updateArtist(dto, publicId));
+    public ResponseEntity<ArtistResponseDTO> update(
+            @RequestPart("data") @Valid ArtistRegistrationDTO dto,
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            @PathVariable UUID publicId) {
+
+        return ResponseEntity.ok(artistService.updateArtist(dto, publicId, file));
     }
 
     @DeleteMapping("/{publicId}")

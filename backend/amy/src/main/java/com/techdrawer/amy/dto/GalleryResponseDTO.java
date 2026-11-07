@@ -12,6 +12,7 @@ public record GalleryResponseDTO(
         City city,
         String Location,
         GalleryType galleryType,
+        String profilePictureUrl,
         String website,
         String businessRegistrationNumber,
         List<Artist>representedArtists

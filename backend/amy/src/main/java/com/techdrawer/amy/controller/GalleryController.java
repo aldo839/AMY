@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -46,15 +47,23 @@ public class GalleryController {
     }
 
     @PostMapping("/{publicId}/register")
-    public ResponseEntity<GalleryResponseDTO> registerGallery(@Valid @RequestBody GalleryRegistrationDTO dto, @PathVariable UUID publicId) {
+    public ResponseEntity<GalleryResponseDTO> registerGallery(
+            @RequestPart("data") @Valid GalleryRegistrationDTO dto,
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            @PathVariable UUID publicId
+    ) {
 
-        return new ResponseEntity<>(galleryService.registerGallery(dto, publicId), HttpStatus.CREATED);
+        return new ResponseEntity<>(galleryService.registerGallery(dto, file, publicId), HttpStatus.CREATED);
     }
 
     @PutMapping("/{publicId}")
-    public ResponseEntity<GalleryResponseDTO> updateGallery(@Valid @RequestBody GalleryRegistrationDTO dto, @PathVariable UUID publicId) {
+    public ResponseEntity<GalleryResponseDTO> updateGallery(
+            @RequestPart("data") @Valid GalleryRegistrationDTO dto,
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            @PathVariable UUID publicId
+    ) {
 
-        return new ResponseEntity<>(galleryService.updateGallery(dto, publicId), HttpStatus.OK);
+        return new ResponseEntity<>(galleryService.updateGallery(dto, file, publicId), HttpStatus.OK);
     }
 
     @DeleteMapping("/{publicId}")

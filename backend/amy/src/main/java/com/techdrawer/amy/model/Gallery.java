@@ -29,6 +29,8 @@ public class Gallery {
     @Enumerated(EnumType.STRING)
     private GalleryType galleryType;
 
+    private String profilePictureUrl;
+
     private String website;
 
     private String businessRegistrationNumber;

@@ -16,7 +16,8 @@ public class CollectorMapperService {
                 collector.getInterest(),
                 collector.getPreferredStyle(),
                 collector.getPreferredArtists(),
-                collector.getShippingAddresses()
+                collector.getShippingAddresses(),
+                collector.getProfilePictureUrl()
         );
     }
 }

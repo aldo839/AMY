@@ -27,6 +27,8 @@ public class Collector {
 
     private List<ArtisticStyle> preferredStyle;
 
+    private String profilePictureUrl;
+
     @ManyToMany
     @JoinTable(
             name = "collector_artist",

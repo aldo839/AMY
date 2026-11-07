@@ -10,6 +10,7 @@ import com.techdrawer.amy.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,6 +23,7 @@ public class ArtistService {
     private final ArtistMapperService artistMapperService;
     private final UserRepository userRepository;
     private final AuthService authService;
+    private final FileStorageService fileStorageService;
 
     public List<ArtistResponseDTO> getAllArtists() {
 
@@ -55,7 +57,7 @@ public class ArtistService {
     }
 
 
-    public ArtistResponseDTO registerArtist(ArtistRegistrationDTO dto, UUID publicId){
+    public ArtistResponseDTO registerArtist(ArtistRegistrationDTO dto, MultipartFile file, UUID publicId){
 
         User user = userRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with public_id : " + publicId));
@@ -79,13 +81,18 @@ public class ArtistService {
         artist.setPortfolioUrl(dto.getPortfolioUrl());
         artist.setSocialLinks(dto.getSocialLinks());
 
+        if (file != null && !file.isEmpty()) {
+            String fileName = fileStorageService.storeFile(file);
+            artist.setProfilePictureUrl("/images/" + fileName);
+        }
+
         Artist registedArtist = artistRepository.save(artist);
 
         return artistMapperService.mapToResponseDTO(registedArtist);
     }
 
 
-    public ArtistResponseDTO updateArtist(ArtistRegistrationDTO dto, UUID publicId) {
+    public ArtistResponseDTO updateArtist(ArtistRegistrationDTO dto, UUID publicId, MultipartFile file) {
 
         User currentUser = authService.getCurrentUser();
 
@@ -109,6 +116,10 @@ public class ArtistService {
         }
         if (!dto.getSocialLinks().isBlank()) {
             artist.setSocialLinks(dto.getSocialLinks());
+        }
+        if (file != null && !file.isEmpty()) {
+            String fileName = fileStorageService.storeFile(file);
+            artist.setProfilePictureUrl("/images/" + fileName);
         }
 
         Artist updatedArtist = artistRepository.save(artist);

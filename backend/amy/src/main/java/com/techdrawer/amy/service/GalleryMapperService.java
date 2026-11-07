@@ -15,6 +15,7 @@ public class GalleryMapperService {
                 gallery.getCity(),
                 gallery.getDescription(),
                 gallery.getGalleryType(),
+                gallery.getProfilePictureUrl(),
                 gallery.getWebsite(),
                 gallery.getBusinessRegistrationNumber(),
                 gallery.getRepresentedArtists()

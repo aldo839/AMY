@@ -9,6 +9,7 @@ import com.techdrawer.amy.repository.GalleryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,6 +21,7 @@ public class GalleryService {
     private final GalleryRepository galleryRepository;
     private final GalleryMapperService galleryMapperService;
     private final AuthService authService;
+    private final FileStorageService fileStorageService;
 
     public List<GalleryResponseDTO> getAllGallery() {
 
@@ -53,7 +55,7 @@ public class GalleryService {
     }
 
 
-    public GalleryResponseDTO registerGallery(GalleryRegistrationDTO dto, UUID publicId) {
+    public GalleryResponseDTO registerGallery(GalleryRegistrationDTO dto, MultipartFile file, UUID publicId) {
 
         User user = authService.getCurrentUser();
 
@@ -76,13 +78,18 @@ public class GalleryService {
         gallery.setBusinessRegistrationNumber(dto.getBusinessRegistrationNumber());
         gallery.setRepresentedArtists(dto.getRepresentedArtist());
 
+        if (file != null && !file.isEmpty()){
+            String fileName = fileStorageService.storeFile(file);
+            gallery.setProfilePictureUrl("/images/" + fileName);
+        }
+
         Gallery registedGallery = galleryRepository.save(gallery);
 
         return galleryMapperService.mapToResponseDTO(registedGallery);
     }
 
 
-    public GalleryResponseDTO updateGallery(GalleryRegistrationDTO dto, UUID publicId) {
+    public GalleryResponseDTO updateGallery(GalleryRegistrationDTO dto, MultipartFile file, UUID publicId) {
 
         User user = authService.getCurrentUser();
 
@@ -109,6 +116,10 @@ public class GalleryService {
         }
         if (!dto.getWebsite().isBlank()) {
             gallery.setWebsite(dto.getWebsite());
+        }
+        if (file != null && !file.isEmpty()){
+            String fileName = fileStorageService.storeFile(file);
+            gallery.setProfilePictureUrl("/images/" + fileName);
         }
 
         Gallery updatedGallery = galleryRepository.save(gallery);

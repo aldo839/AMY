@@ -18,7 +18,9 @@ public record CollectorResponseDTO(
 
         List<Artist> preferredArtists,
 
-        String shippingAddresses
+        String shippingAddresses,
+
+        String profilePictureUrl
 
 ) {
 }
