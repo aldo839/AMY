@@ -6,6 +6,7 @@ import com.techdrawer.amy.model.ArtisticStyle;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,5 +18,9 @@ public interface ArtistRepository extends JpaRepository<Artist, Long> {
     Optional<Artist> findByArtisticStyle(ArtisticStyle style);
 
     Optional<Artist> findByUser_PublicId(UUID publicId);
+
+    List<Artist> findByUser_PublicIdIn(List<UUID> publicIds);
+
+    Optional<Artist> findByUserId(Long id);
 
 }

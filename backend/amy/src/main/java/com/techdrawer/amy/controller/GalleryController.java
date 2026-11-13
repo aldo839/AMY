@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/gallery")
+@RequestMapping("/api/gallery")
 @RequiredArgsConstructor
 public class GalleryController {
 

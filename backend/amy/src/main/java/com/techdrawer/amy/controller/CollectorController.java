@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/collectors")
+@RequestMapping("/api/collectors")
 @RequiredArgsConstructor
 public class CollectorController {
 
