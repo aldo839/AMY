@@ -1,6 +1,6 @@
 package com.techdrawer.amy.service;
 
-import com.techdrawer.amy.exception.UserNotFoundException;
+import com.techdrawer.amy.exception.ResourceNotFoundException;
 import com.techdrawer.amy.model.User;
 import com.techdrawer.amy.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getEmail())

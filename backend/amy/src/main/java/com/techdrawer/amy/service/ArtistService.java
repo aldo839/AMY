@@ -3,7 +3,7 @@ package com.techdrawer.amy.service;
 import com.techdrawer.amy.dto.ArtistRegistrationDTO;
 import com.techdrawer.amy.dto.ArtistResponseDTO;
 import com.techdrawer.amy.exception.MissingArgumentException;
-import com.techdrawer.amy.exception.UserNotFoundException;
+import com.techdrawer.amy.exception.ResourceNotFoundException;
 import com.techdrawer.amy.model.*;
 import com.techdrawer.amy.repository.ArtistRepository;
 import com.techdrawer.amy.repository.UserRepository;
@@ -53,14 +53,14 @@ public class ArtistService {
 
         return artistRepository.findByUser_PublicId(publicId)
                 .map(artistMapperService::mapToResponseDTO)
-                .orElseThrow(() -> new UserNotFoundException("Artist not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Artist not found"));
     }
 
 
     public ArtistResponseDTO registerArtist(ArtistRegistrationDTO dto, MultipartFile file, UUID publicId){
 
         User user = userRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with public_id : " + publicId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with public_id : " + publicId));
 
         User currentUser = authService.getCurrentUser();
 
@@ -137,7 +137,7 @@ public class ArtistService {
         }
 
         Artist artist = artistRepository.findByUser_PublicId(publicId)
-                .orElseThrow(() -> new UserNotFoundException("Artist not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Artist not found"));
 
         artistRepository.delete(artist);
     }

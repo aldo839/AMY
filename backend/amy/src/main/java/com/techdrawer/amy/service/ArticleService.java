@@ -2,7 +2,7 @@ package com.techdrawer.amy.service;
 
 import com.techdrawer.amy.dto.ArticleRegistrationDTO;
 import com.techdrawer.amy.dto.ArticleResponseDTO;
-import com.techdrawer.amy.exception.UserNotFoundException;
+import com.techdrawer.amy.exception.ResourceNotFoundException;
 import com.techdrawer.amy.model.*;
 import com.techdrawer.amy.repository.ArticleRepository;
 import com.techdrawer.amy.repository.ArtistRepository;
@@ -37,7 +37,7 @@ public class ArticleService {
     public List<ArticleResponseDTO> getArticleByArtist(UUID publicId) {
 
         Artist artist = artistRepository.findByUser_PublicId(publicId)
-                .orElseThrow(() -> new UserNotFoundException("Artist not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Artist not found"));
 
         return articleRepository.findByArtist_User_PublicId(artist.getUser().getPublicId()).stream()
                 .map(articleMapperService::mapToResponseDTO)
@@ -48,7 +48,7 @@ public class ArticleService {
     public ArticleResponseDTO getArticleByPublicId(UUID publicId) {
 
         Article article = articleRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new UserNotFoundException("Article not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Article not found"));
 
         return articleMapperService.mapToResponseDTO(article);
     }
@@ -59,7 +59,7 @@ public class ArticleService {
         User user = authService.getCurrentUser();
 
         Artist artist = artistRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new UserNotFoundException("Artist profile not found for this actions"));
+                .orElseThrow(() -> new ResourceNotFoundException("Artist profile not found for this actions"));
 
         Article  article = new Article();
 
@@ -104,7 +104,7 @@ public class ArticleService {
         User user = authService.getCurrentUser();
 
         Article article = articleRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new UserNotFoundException("Article not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Article not found"));
 
         if (!user.getId().equals(article.getArtist().getId())) {
             throw new AccessDeniedException("You can't update this article");
@@ -159,7 +159,7 @@ public class ArticleService {
 
 
         Article article = articleRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new UserNotFoundException("Article not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Article not found"));
 
         if (!user.getId().equals(article.getArtist().getId()) || !user.getRole().equals(Role.ADMIN)) {
             throw new AccessDeniedException("You can't delete this article");

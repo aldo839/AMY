@@ -4,8 +4,8 @@ import com.techdrawer.amy.config.JwtUtils;
 import com.techdrawer.amy.dto.*;
 import com.techdrawer.amy.exception.ExpiredCodeException;
 import com.techdrawer.amy.exception.MissingArgumentException;
-import com.techdrawer.amy.exception.UserAlreadyExistException;
-import com.techdrawer.amy.exception.UserNotFoundException;
+import com.techdrawer.amy.exception.ResourceAlreadyExistException;
+import com.techdrawer.amy.exception.ResourceNotFoundException;
 import com.techdrawer.amy.model.RefreshToken;
 import com.techdrawer.amy.model.Role;
 import com.techdrawer.amy.model.User;
@@ -46,7 +46,7 @@ public class AuthService {
         User user = new User();
 
         if (userRepository.existsByEmail(dto.getEmail())){
-            throw new UserAlreadyExistException("Email already registered");
+            throw new ResourceAlreadyExistException("Email already registered");
         }
 
         if (dto.getName() == null || dto.getName().isBlank()
@@ -94,7 +94,7 @@ public class AuthService {
         }
 
         Validation validation = validationRepository.findByCode(dto.getCode())
-                .orElseThrow(() -> new UserNotFoundException("Activation code not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Activation code not found"));
 
         if (validation.getExpiration().isBefore(Instant.now())) {
             throw new ExpiredCodeException("Activation code has expired");
@@ -130,7 +130,7 @@ public class AuthService {
         String accessToken = jwtUtils.generateToken(userDetails);
 
         User loggedUser = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         UserResponseDTO user = userMapperService.mapToResponseDTO(loggedUser);
 
@@ -144,7 +144,7 @@ public class AuthService {
     public void logout(String tokenValue) {
 
         RefreshToken refreshToken = refreshTokenRepository.findByToken(tokenValue)
-                .orElseThrow(() -> new UserNotFoundException("Token not found, please login"));
+                .orElseThrow(() -> new ResourceNotFoundException("Token not found, please login"));
 
         refreshTokenRepository.delete(refreshToken);
     }
@@ -162,7 +162,7 @@ public class AuthService {
         String email = authentication.getName();
 
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
 
@@ -174,7 +174,7 @@ public class AuthService {
         }
 
         User user = userRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         validationService.passwordResetCode(user);
     }
@@ -186,7 +186,7 @@ public class AuthService {
         }
 
         Validation validation = validationRepository.findByCode(dto.getCode())
-                .orElseThrow(() -> new UserNotFoundException("Code not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Code not found"));
 
         User user = validation.getUser();
 

@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 public class CollectorRegistrationDTO {
@@ -19,7 +20,7 @@ public class CollectorRegistrationDTO {
 
     private List<ArtisticStyle> preferredStyle;
 
-    private List<Artist> preferredArtists;
+    private List<UUID> preferredArtistsPublicIds;
 
     @Size(max = 500, message = "Shipping address must not contain more than 500 characters")
     private String shippingAddress;

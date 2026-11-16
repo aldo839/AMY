@@ -2,7 +2,7 @@ package com.techdrawer.amy.service;
 
 import com.techdrawer.amy.dto.ExhibitionRegistrationDTO;
 import com.techdrawer.amy.dto.ExhibitionResponseDTO;
-import com.techdrawer.amy.exception.UserNotFoundException;
+import com.techdrawer.amy.exception.ResourceNotFoundException;
 import com.techdrawer.amy.model.*;
 import com.techdrawer.amy.repository.ArtistRepository;
 import com.techdrawer.amy.repository.ExhibitionRepository;
@@ -44,7 +44,7 @@ public class ExhibitionService {
     public ExhibitionResponseDTO getExhibitionByPublicId(UUID publicId) {
 
         Exhibition exhibition = exhibitionRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new UserNotFoundException("Exhibition not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Exhibition not found"));
 
         return exhibitionMapperService.mapToResponseDTO(exhibition);
     }
@@ -54,7 +54,7 @@ public class ExhibitionService {
         User user = authService.getCurrentUser();
 
         User organizer = userRepository.findById(user.getId())
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Exhibition exhibition = new Exhibition();
 
@@ -105,7 +105,7 @@ public class ExhibitionService {
         User user = authService.getCurrentUser();
 
         Exhibition exhibition = exhibitionRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new UserNotFoundException("Exhibition not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Exhibition not found"));
 
         if (!user.getId().equals(exhibition.getOrganizer().getId())) {
             throw new AccessDeniedException("You can't update this exhibition");
@@ -164,7 +164,7 @@ public class ExhibitionService {
         User user = authService.getCurrentUser();
 
         Exhibition exhibition = exhibitionRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new UserNotFoundException("Exhibition not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Exhibition not found"));
 
         if (!user.getId().equals(exhibition.getOrganizer().getId())) {
             throw new AccessDeniedException("You can't delete this exhibition");

@@ -65,10 +65,11 @@ public class OpenApiConfig {
                     );
 
                     Boolean isAuthRoute = path.startsWith("/api/auth");
-
                     Boolean refreshTokenRoute = path.startsWith("/api/refresh/");
+                    Boolean cartRoute = path.startsWith("/api/cart");
+                    Boolean cartItemRoute = path.startsWith("/api/cart-item");
 
-                    if (isPublicGet || isAuthRoute || refreshTokenRoute) {
+                    if (isPublicGet || isAuthRoute || refreshTokenRoute || cartRoute || cartItemRoute) {
                         operation.setSecurity(Collections.emptyList());
                     }
 

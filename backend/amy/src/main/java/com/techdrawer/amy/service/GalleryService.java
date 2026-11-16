@@ -3,7 +3,7 @@ package com.techdrawer.amy.service;
 import com.techdrawer.amy.dto.GalleryRegistrationDTO;
 import com.techdrawer.amy.dto.GalleryResponseDTO;
 import com.techdrawer.amy.exception.MissingArgumentException;
-import com.techdrawer.amy.exception.UserNotFoundException;
+import com.techdrawer.amy.exception.ResourceNotFoundException;
 import com.techdrawer.amy.model.*;
 import com.techdrawer.amy.repository.GalleryRepository;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +51,7 @@ public class GalleryService {
 
         return galleryRepository.findByUser_PublicId(publicId)
                 .map(galleryMapperService::mapToResponseDTO)
-                .orElseThrow(() -> new UserNotFoundException("Gallery not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Gallery not found"));
     }
 
 
@@ -137,7 +137,7 @@ public class GalleryService {
         }
 
         Gallery gallery = galleryRepository.findByUser_PublicId(publicId)
-                .orElseThrow(() -> new UserNotFoundException("Gallery not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Gallery not found"));
 
         galleryRepository.delete(gallery);
     }

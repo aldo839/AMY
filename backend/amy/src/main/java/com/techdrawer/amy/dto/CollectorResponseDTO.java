@@ -1,6 +1,5 @@
 package com.techdrawer.amy.dto;
 
-import com.techdrawer.amy.model.Artist;
 import com.techdrawer.amy.model.ArtisticStyle;
 import com.techdrawer.amy.model.CollectorType;
 
@@ -16,7 +15,7 @@ public record CollectorResponseDTO(
 
         List<ArtisticStyle>preferredStyle,
 
-        List<Artist> preferredArtists,
+        List<ArtistResponseDTO> preferredArtists,
 
         String shippingAddresses,
 

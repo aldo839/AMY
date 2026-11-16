@@ -2,11 +2,9 @@ package com.techdrawer.amy.service;
 
 import com.techdrawer.amy.dto.CollectorRegistrationDTO;
 import com.techdrawer.amy.dto.CollectorResponseDTO;
-import com.techdrawer.amy.exception.UserNotFoundException;
-import com.techdrawer.amy.model.Collector;
-import com.techdrawer.amy.model.CollectorType;
-import com.techdrawer.amy.model.Role;
-import com.techdrawer.amy.model.User;
+import com.techdrawer.amy.exception.ResourceNotFoundException;
+import com.techdrawer.amy.model.*;
+import com.techdrawer.amy.repository.ArtistRepository;
 import com.techdrawer.amy.repository.CollectorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -23,6 +21,7 @@ public class CollectorService {
     private final CollectorRepository collectorRepository;
     private final CollectorMapperService collectorMapperService;
     private final AuthService authService;
+    private final ArtistRepository artistRepository;
     private final FileStorageService fileStorageService;
 
     public List<CollectorResponseDTO> getAllCollector() {
@@ -44,7 +43,7 @@ public class CollectorService {
     public CollectorResponseDTO getCollectorByPublicId(UUID publicId) {
 
         Collector collector = collectorRepository.findByUser_PublicId(publicId)
-                .orElseThrow(() -> new UserNotFoundException("Collector not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Collector not found"));
 
         return collectorMapperService.mapToResponseDTO(collector);
     }
@@ -63,9 +62,13 @@ public class CollectorService {
         collector.setUser(user);
         collector.setCollectorType(dto.getCollectorType());
         collector.setInterest(dto.getInterest());
-        collector.setPreferredArtists(dto.getPreferredArtists());
         collector.setPreferredStyle(dto.getPreferredStyle());
         collector.setShippingAddresses(dto.getShippingAddress());
+
+        if (dto.getPreferredArtistsPublicIds() != null && !dto.getPreferredArtistsPublicIds().isEmpty()) {
+            List<Artist> preferredArtists = artistRepository.findByUser_PublicIdIn(dto.getPreferredArtistsPublicIds());
+            collector.setPreferredArtists(preferredArtists);
+        }
 
         if (file != null && !file.isEmpty()){
             String fileName = fileStorageService.storeFile(file);
@@ -94,8 +97,9 @@ public class CollectorService {
         if (dto.getInterest() != null) {
             collector.setInterest(dto.getInterest());
         }
-        if (dto.getPreferredArtists() != null) {
-            collector.setPreferredArtists(dto.getPreferredArtists());
+        if (dto.getPreferredArtistsPublicIds() != null && !dto.getPreferredArtistsPublicIds().isEmpty()) {
+            List<Artist> preferredArtists = artistRepository.findByUser_PublicIdIn(dto.getPreferredArtistsPublicIds());
+            collector.setPreferredArtists(preferredArtists);
         }
         if (dto.getPreferredStyle() != null) {
             collector.setPreferredStyle(dto.getPreferredStyle());
@@ -123,7 +127,7 @@ public class CollectorService {
         }
 
         Collector collector = collectorRepository.findByUser_PublicId(publicId)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         collectorRepository.delete(collector);
     }

@@ -27,7 +27,7 @@ public class CollectorController {
         return new ResponseEntity<>(collectorService.getAllCollector(), HttpStatus.OK);
     }
 
-    @GetMapping("/{type}")
+    @GetMapping("/type/{type}")
     public ResponseEntity<List<CollectorResponseDTO>> getCollectorByType(@PathVariable CollectorType type) {
 
         return new ResponseEntity<>(collectorService.getCollectorByType(type), HttpStatus.OK);
