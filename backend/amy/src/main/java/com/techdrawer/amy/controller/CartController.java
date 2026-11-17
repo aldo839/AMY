@@ -25,27 +25,27 @@ public class CartController {
     @GetMapping
     public ResponseEntity<CartResponseDTO> findCart(
             Authentication authentication,
-            @RequestHeader(value = "X-Guest-Token", required = false) UUID guestToken) {
+            @RequestHeader(value = "X-Guest-Email", required = false) String guestEmail) {
 
         User currentUser = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         UUID userPublicId = currentUser.getPublicId();
 
-        return new ResponseEntity<>(cartService.getCart(userPublicId, guestToken), HttpStatus.OK);
+        return new ResponseEntity<>(cartService.getCart(userPublicId, guestEmail), HttpStatus.OK);
     }
 
     @PostMapping("/create")
     public ResponseEntity<CartResponseDTO> createCart(
             Authentication authentication,
-            @RequestHeader(value = "X-Guest-Token", required = false) UUID guestToken) {
+            @RequestHeader(value = "X-Guest-Email", required = false) String guestEmail) {
 
         User currentUser = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         UUID userPublicId = currentUser.getPublicId();
 
-        return new ResponseEntity<>(cartService.createCart(userPublicId, guestToken), HttpStatus.CREATED);
+        return new ResponseEntity<>(cartService.createCart(userPublicId, guestEmail), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")

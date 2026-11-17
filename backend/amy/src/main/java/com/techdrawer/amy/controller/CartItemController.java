@@ -8,8 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
 @RestController
 @RequestMapping("/api/cart-item")
 @RequiredArgsConstructor
@@ -22,29 +20,29 @@ public class CartItemController {
     @PostMapping("/add/{id}")
     public ResponseEntity<Void> addItem(
             @PathVariable Long id,
-            @RequestHeader(value = "X-Guest-Token", required = false) UUID guestToken,
+            @RequestHeader(value = "X-Guest-Email", required = false) String guestEmail,
             @RequestParam(required = false, defaultValue = "1") Integer quantity) {
 
-        cartItemService.addItem(guestToken, id, quantity);
+        cartItemService.addItem(guestEmail, id, quantity);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PutMapping("/remove/{id}")
     public ResponseEntity<Void> addItem(
             @PathVariable Long id,
-            @RequestHeader(value = "X-Guest-Token", required = false) UUID guestToken) {
+            @RequestHeader(value = "X-Guest-Email", required = false) String guestEmail) {
 
-        cartItemService.removeItem(guestToken, id);
+        cartItemService.removeItem(guestEmail, id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<Void> updateItemQuantity(
             @PathVariable Long id,
-            @RequestHeader(value = "X-Guest-Token", required = false) UUID guestToken,
+            @RequestHeader(value = "X-Guest-Email", required = false) String guestEmail,
             int quantity) {
 
-        cartItemService.updateItemQuantity(guestToken, id, quantity);
+        cartItemService.updateItemQuantity(guestEmail, id, quantity);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

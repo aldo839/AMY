@@ -25,10 +25,10 @@ public class CartItemService {
     private final ArticleRepository articleRepository;
 
     @Transactional
-    public void addItem(UUID guestToken, Long articleId, int quantity) {
+    public void addItem(String guestEmail, Long articleId, int quantity) {
         User connectedUser = authService.getCurrentUser();
 
-        Cart cart = cartService.getCartEntity(connectedUser != null ? connectedUser.getPublicId() : null, guestToken);
+        Cart cart = cartService.getCartEntity(connectedUser != null ? connectedUser.getPublicId() : null, guestEmail);
 
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new ResourceNotFoundException("Article not found"));
@@ -55,16 +55,15 @@ public class CartItemService {
     }
 
     @Transactional
-    public void removeItem(UUID guestToken, Long articleId) {
+    public void removeItem(String guestEmail, Long articleId) {
         User connectedUser = authService.getCurrentUser();
-        Cart cart = cartService.getCartEntity(connectedUser != null ? connectedUser.getPublicId() : null, guestToken);
+        Cart cart = cartService.getCartEntity(connectedUser != null ? connectedUser.getPublicId() : null, guestEmail);
 
         CartItem cartItem = cart.getItems().stream()
                 .filter(item -> item.getArticle().getId().equals(articleId))
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Article not found in cart"));
 
-        // Suppression de la collection et de la table liée
         cart.getItems().remove(cartItem);
         cartItemRepository.delete(cartItem);
 
@@ -72,9 +71,9 @@ public class CartItemService {
     }
 
     @Transactional
-    public void updateItemQuantity(UUID guestToken, Long articleId, int quantity) {
+    public void updateItemQuantity(String guestEmail, Long articleId, int quantity) {
         User connectedUser = authService.getCurrentUser();
-        Cart cart = cartService.getCartEntity(connectedUser != null ? connectedUser.getPublicId() : null, guestToken);
+        Cart cart = cartService.getCartEntity(connectedUser != null ? connectedUser.getPublicId() : null, guestEmail);
 
         CartItem cartItem = cart.getItems().stream()
                 .filter(item -> item.getArticle().getId().equals(articleId))

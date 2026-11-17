@@ -2,6 +2,7 @@ package com.techdrawer.amy.model;
 
 import com.techdrawer.amy.exception.ResourceNotFoundException;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,7 +25,8 @@ public class Cart {
 
     private UUID userPublicId;
 
-    private UUID guestToken;
+    @Email(message = "Email must be valid")
+    private String guestEmail;
 
     public void addItem(CartItem item) {
 

@@ -22,19 +22,16 @@ public class CartService {
     private final CartItemRepository cartItemRepository;
     private final AuthService authService;
 
-    private void validateOwner(UUID userPublicId, UUID guestToken) {
+    private void validateOwner(UUID userPublicId, String guestEmail) {
 
-        if ((userPublicId == null && guestToken == null)
-            || (userPublicId != null && guestToken != null)) {
+        if ((userPublicId == null && guestEmail == null)
+            || (userPublicId != null && guestEmail != null)) {
 
             throw new IllegalArgumentException("Only one properties must be provided");
         }
     }
 
-    private Optional<CartResponseDTO> findCart(
-            UUID userPublicId,
-            UUID guestToken
-    ) {
+    private Optional<CartResponseDTO> findCart(UUID userPublicId, String guestEmail) {
 
         if (userPublicId != null) {
             Cart cart = cartRepository.findByUserPublicId(userPublicId)
@@ -43,27 +40,27 @@ public class CartService {
             return Optional.ofNullable(cartMapperService.mapToResponseDTO(cart));
         }
 
-        Cart cart = cartRepository.findByGuestToken(guestToken)
+        Cart cart = cartRepository.findByGuestEmail(guestEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
 
         return Optional.ofNullable(cartMapperService.mapToResponseDTO(cart));
     }
 
-    public CartResponseDTO getCart(UUID userPublicId, UUID guestToken) {
+    public CartResponseDTO getCart(UUID userPublicId, String guestEmail) {
 
-        validateOwner(userPublicId, guestToken);
+        validateOwner(userPublicId, guestEmail);
 
-        return findCart(userPublicId, guestToken)
-                .orElseGet(() -> createCart(userPublicId, guestToken));
+        return findCart(userPublicId, guestEmail)
+                .orElseGet(() -> createCart(userPublicId, guestEmail));
     }
 
-    public CartResponseDTO createCart(UUID userPublicId, UUID guestToken) {
+    public CartResponseDTO createCart(UUID userPublicId, String guestEmail) {
 
-        validateOwner(userPublicId, guestToken);
+        validateOwner(userPublicId, guestEmail);
 
         User currentUser = authService.getCurrentUser();
 
-        return findCart(userPublicId, guestToken)
+        return findCart(userPublicId, guestEmail)
                 .orElseGet(() -> {
 
                     Cart cart = new Cart();
@@ -73,7 +70,7 @@ public class CartService {
                         cart.setUserPublicId(userPublicId);
 
                     } else {
-                        cart.setGuestToken(guestToken);
+                        cart.setGuestEmail(guestEmail);
                     }
 
                     Cart savedCart = cartRepository.save(cart);
@@ -111,8 +108,8 @@ public class CartService {
         cartRepository.delete(cart);
     }
 
-    public Cart getCartEntity(UUID userPublicId, UUID guestToken) {
-        validateOwner(userPublicId, guestToken);
+    public Cart getCartEntity(UUID userPublicId, String guestEmail) {
+        validateOwner(userPublicId, guestEmail);
 
         if (userPublicId != null) {
             return cartRepository.findByUserPublicId(userPublicId)
@@ -123,10 +120,10 @@ public class CartService {
                     });
         }
 
-        return cartRepository.findByGuestToken(guestToken)
+        return cartRepository.findByGuestEmail(guestEmail)
                 .orElseGet(() -> {
                     Cart cart = new Cart();
-                    cart.setGuestToken(guestToken);
+                    cart.setGuestEmail(guestEmail);
                     return cartRepository.save(cart);
                 });
     }
