@@ -28,7 +28,7 @@ public class CartMapperService {
                 cart.getTotalAmount(),
                 itemDTOs,
                 cart.getUserPublicId(),
-                cart.getGuestEmail()
+                cart.getGuestToken()
 
         );
     }

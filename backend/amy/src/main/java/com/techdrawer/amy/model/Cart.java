@@ -2,67 +2,128 @@ package com.techdrawer.amy.model;
 
 import com.techdrawer.amy.exception.ResourceNotFoundException;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Getter @Setter
+@Getter
+@Setter
+@Table(name = "carts")
 public class Cart {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private BigDecimal totalAmount;
+    @OneToMany(
+            mappedBy = "cart",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private Set<CartItem> items = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<CartItem> items;
-
+    @Column(unique = true)
     private UUID userPublicId;
 
-    @Email(message = "Email must be valid")
-    private String guestEmail;
+    @Column(unique = true)
+    private UUID guestToken;
 
     public void addItem(CartItem item) {
 
-        if (containsArticle(item.getArticle().getId())) {
-            throw new IllegalArgumentException("Article already in cart");
+        if (item == null || item.getArticle() == null) {
+            throw new IllegalArgumentException("Invalid cart item");
         }
+
+        if (item.getQuantity() == null || item.getQuantity() <= 0) {
+            throw new IllegalArgumentException("Invalid quantity");
+        }
+
+        if (containsArticle(item.getArticle().getId())) {
+            throw new IllegalArgumentException(
+                    "Article already in cart"
+            );
+        }
+
         items.add(item);
         item.setCart(this);
     }
 
     public void removeItem(CartItem item) {
 
-        if (!containsArticle(item.getArticle().getId())) {
-            throw new ResourceNotFoundException("Article not found in cart");
+        if (item == null || item.getArticle() == null) {
+            throw new IllegalArgumentException("Invalid cart item");
         }
-        items.remove(item);
-        item.setCart(this);
+
+        CartItem existingItem = items.stream()
+                .filter(cartItem ->
+                        cartItem.getArticle().getId()
+                                .equals(item.getArticle().getId())
+                )
+                .findFirst()
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Article not found in cart"
+                        )
+                );
+
+        items.remove(existingItem);
+        existingItem.setCart(null);
     }
 
     public void clearCart() {
-        this.items.clear();
+
+        items.forEach(item -> item.setCart(null));
+        items.clear();
     }
 
-    public Boolean containsArticle(Long articleId) {
+    public boolean containsArticle(Long articleId) {
+
+        if (articleId == null) {
+            return false;
+        }
 
         return items.stream()
-                .anyMatch(item -> item.getArticle().getId().equals(articleId));
+                .anyMatch(item ->
+                        item.getArticle() != null
+                                && articleId.equals(item.getArticle().getId())
+                );
     }
 
     public BigDecimal getTotalAmount() {
 
-        this.totalAmount = items.stream()
-                .map(CartItem::getUnitPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return items.stream()
+                .map(item -> {
+                    Article article = item.getArticle();
 
-        return totalAmount;
+                    BigDecimal price = article.getPrice();
+                    BigDecimal discount =
+                            article.getDiscountPercentage() != null
+                                    ? article.getDiscountPercentage()
+                                    : BigDecimal.ZERO;
+
+                    BigDecimal finalPrice = price.subtract(price.multiply(discount)
+                            .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
+                    );
+
+                    return finalPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
+    @PrePersist
+    @PreUpdate
+    private void validateOwner() {
+
+        if ((userPublicId == null && guestToken == null) || (userPublicId != null && guestToken != null)) {
+
+            throw new IllegalStateException("A cart must have exactly one owner");
+        }
+    }
 }

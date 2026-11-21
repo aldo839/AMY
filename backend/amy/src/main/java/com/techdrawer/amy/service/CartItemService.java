@@ -25,13 +25,18 @@ public class CartItemService {
     private final ArticleRepository articleRepository;
 
     @Transactional
-    public void addItem(String guestEmail, Long articleId, int quantity) {
+    public void addItem(UUID guestToken, Long articleId, int quantity) {
+
         User connectedUser = authService.getCurrentUser();
 
-        Cart cart = cartService.getCartEntity(connectedUser != null ? connectedUser.getPublicId() : null, guestEmail);
+        Cart cart = cartService.getCartEntity(connectedUser != null ? connectedUser.getPublicId() : null, guestToken);
 
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new ResourceNotFoundException("Article not found"));
+
+        if (quantity > article.getAvailableQuantity()) {
+            throw new IllegalArgumentException("Quantity can't be more dans available");
+        }
 
         CartItem cartItem = cart.getItems().stream()
                 .filter(item -> item.getArticle().getId().equals(articleId))
@@ -42,7 +47,6 @@ public class CartItemService {
             cartItem = new CartItem();
             cartItem.setCart(cart);
             cartItem.setArticle(article);
-            cartItem.setUnitPrice(article.getPrice());
             cartItem.setQuantity(quantity);
 
             cart.getItems().add(cartItem);
@@ -55,9 +59,10 @@ public class CartItemService {
     }
 
     @Transactional
-    public void removeItem(String guestEmail, Long articleId) {
+    public void removeItem(UUID guestToken, Long articleId) {
+
         User connectedUser = authService.getCurrentUser();
-        Cart cart = cartService.getCartEntity(connectedUser != null ? connectedUser.getPublicId() : null, guestEmail);
+        Cart cart = cartService.getCartEntity(connectedUser != null ? connectedUser.getPublicId() : null, guestToken);
 
         CartItem cartItem = cart.getItems().stream()
                 .filter(item -> item.getArticle().getId().equals(articleId))
@@ -71,9 +76,10 @@ public class CartItemService {
     }
 
     @Transactional
-    public void updateItemQuantity(String guestEmail, Long articleId, int quantity) {
+    public void updateItemQuantity(UUID guestToken, Long articleId, int quantity) {
+
         User connectedUser = authService.getCurrentUser();
-        Cart cart = cartService.getCartEntity(connectedUser != null ? connectedUser.getPublicId() : null, guestEmail);
+        Cart cart = cartService.getCartEntity(connectedUser != null ? connectedUser.getPublicId() : null, guestToken);
 
         CartItem cartItem = cart.getItems().stream()
                 .filter(item -> item.getArticle().getId().equals(articleId))

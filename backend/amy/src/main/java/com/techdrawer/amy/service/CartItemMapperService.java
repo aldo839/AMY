@@ -13,7 +13,6 @@ public class CartItemMapperService {
 
                 cartItem.getId(),
                 cartItem.getQuantity(),
-                cartItem.getUnitPrice(),
                 cartItem.getArticle().getTitle(),
                 cartItem.getArticle().getArtist().getUser().getName(),
                 cartItem.getCart().getId()

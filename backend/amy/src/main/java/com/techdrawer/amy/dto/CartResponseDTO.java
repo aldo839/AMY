@@ -13,7 +13,7 @@ public record CartResponseDTO(
 
         UUID userPublicId,
 
-        String guestEmail
+        UUID guestEmail
 
 ) {
 }
